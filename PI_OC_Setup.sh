@@ -1,5 +1,14 @@
 #!/bin/bash
 #
+# *******************
+# Set basic variables
+# *******************
+
+# Password & User for Samba
+	PASS="admin"
+	LOGIN="admin"
+# Password & User for Samba
+
 
 read -p "Full-Auto-Setup or step-by-step? (full/part) " x
 if [ "$x" = "full" ]; then

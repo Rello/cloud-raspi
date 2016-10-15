@@ -25,4 +25,7 @@ find ${ocdata}/ -type f -print0 | xargs -0 chmod 0640
 find ${ocdata}/ -type d -print0 | xargs -0 chmod 0750
 sudo chown -R ${htuser}:${htuser} ${ocdata}/
 
-cd ${ocpath}
+echo "    create crontabs"
+cat <(crontab -u www-data -l) <(echo "*/15 * * * * php -f /var/www/owncloud/cron.php") | crontab -u www-data -
+/etc/init.d/cron restart
+

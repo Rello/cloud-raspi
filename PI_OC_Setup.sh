@@ -32,12 +32,12 @@ then
 fi
 
 # ============================================================
-# Configure timezone and locale
+# Configure system
 # ============================================================
 if [ "$FULL" = "yes" ]; then
 	x="y"
 else
-	read -p "set timezone&locale? (y/n) " x
+	read -p "configure basis System? (y/n) " x
 fi
 if [ "$x" = "y" ]; then
 	echo "Europe/Berlin" > /etc/timezone
@@ -47,20 +47,16 @@ if [ "$x" = "y" ]; then
 	dpkg-reconfigure --frontend=noninteractive locales
 	update-locale LANG="de_DE.UTF-8"
 	echo "     locales set"
-fi
 
-# ============================================================
-# expand filesystem
-# /etc/fstab: add tmpfs for /var/tmp and /var/log
-# set PI2 to 1GHZ and gpu_memory to 16 for headless usage
-# ============================================================
-if [ "$FULL" = "yes" ]; then
-	x="y"
-else
-	read -p "modify /etc/fstab and boot.txt? (y/n) " x
-fi
-if [ "$x" = "y" ]
-then
+	# ============================================================
+	# expand filesystem
+	# /etc/fstab: add tmpfs for /var/tmp and /var/log
+	# set PI2 to 1GHZ and gpu_memory to 16 for headless usage
+	# ============================================================
+
+	echo "     **********"
+	echo "     setup /etc/fstab and boot.txt"
+	echo "     **********"
 	raspi-config --expand-rootfs
 	echo -e "tmpfs\t/var/tmp\ttmpfs\tdefaults,noatime,nosuid,size=200m\t0\t0" >> /etc/fstab
 	echo -e "tmpfs\t/var/log\ttmpfs\tdefaults,noatime,nosuid,size=100m\t0\t0" >> /etc/fstab
@@ -70,20 +66,12 @@ then
 	grep -q -F 'sdram_freq=450' /boot/config.txt || echo 'sdram_freq=450' >> /boot/config.txt
 	grep -q -F 'gpu_mem=16' /boot/config.txt || echo 'gpu_mem=16' >> /boot/config.txt
 	grep -q -F 'device_tree=' /boot/config.txt || echo 'device_tree=' >> /boot/config.txt
-	echo "     /etc/fstab and boot.txt modified"
-fi
+	echo "     setup /etc/fstab and boot.txt - done"
+	echo "     **********"
 
-
-# ============================================================
-# Cleanup obsolete packages and install required ones
-# ============================================================
-if [ "$FULL" = "yes" ]; then
-	x="y"
-else
-	read -p "prepare OS? (y/n) " x
-fi
-if [ "$x" = "y" ]
-then
+	# ============================================================
+	# Cleanup obsolete packages and install required ones
+	# ============================================================
 	echo -e "deb http://mirrordirector.raspbian.org/raspbian/ stretch main contrib non-free rpi" >>/etc/apt/sources.list
 	echo -e "Package: *\nPin: release n=jessie\nPin-Priority: 600" >/etc/apt/preferences
 	echo "     apt: source list patched for PHP7"
@@ -95,10 +83,12 @@ then
 	echo mysql-server mysql-server/root_password password root | sudo debconf-set-selections
 	echo mysql-server mysql-server/root_password_again password root | sudo debconf-set-selections
 	
-	apt-get ${APTOPTION} install nginx-full mysql-server samba samba-common-bin smbclient rpi-update
+	apt-get ${APTOPTION} install samba samba-common-bin smbclient rpi-update rsync zip
+	apt-get ${APTOPTION} install mariadb-server
+	apt-get ${APTOPTION} install -t stretch nginx-full
 	echo "     apt: installed nginx & Samba"
 
-	apt-get ${APTOPTION} install -t stretch php7.0 php7.0-curl php7.0-gd php7.0-fpm php7.0-cli php7.0-opcache php7.0-mbstring php7.0-xml php7.0-zip php7.0-mysql php-apcu php-apcu-bc
+	apt-get ${APTOPTION} install -t stretch php7.0 php7.0-curl php7.0-gd php7.0-fpm php7.0-cli php7.0-opcache php7.0-mbstring php7.0-xml php7.0-zip php7.0-mysql php-apcu php-apcu-bc php7.0-mcrypt
 	echo "     apt: installed php7"
 		
 	apt-get ${APTOPTION} autoremove
@@ -116,11 +106,31 @@ then
 		sed -i 's/^post_max_size.*/post_max_size = 1024M/g' /etc/php/7.0/fpm/php.ini
 		sed -i 's/^upload_max_filesize.*/upload_max_filesize = 1024M/g' /etc/php/7.0/fpm/php.ini
 		sed -i 's#;upload_tmp_dir =#upload_tmp_dir = /var/tmp#g' /etc/php/7.0/fpm/php.ini
-		sed -i 's#;env\[#env\[#g' /etc/php/7.0/fpm/pool.d/www.conf
-		echo -e "apc.enabled = 1\napc.enable_cli = 1" >>/etc/php/7.0/cli/php.ini
 		echo -e "apc.enabled = 1\napc.include_once_override = 0\napc.shm_size = 256M" >>/etc/php/7.0/fpm/php.ini
+
+		sed -i 's#;env\[#env\[#g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^pm = .*/pm = dynamic/g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^pm.max_children.*/pm.max_children = 20/g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^pm.start_servers.*/pm.start_servers = 10/g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^pm.min_spare_servers.*/pm.min_spare_servers = 5/g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^pm.max_spare_servers.*/pm.max_spare_servers = 10/g' /etc/php/7.0/fpm/pool.d/www.conf
+		sed -i 's/^;pm.max_requests.*/pm.max_requests = 500/g' /etc/php/7.0/fpm/pool.d/www.conf
+		
+		echo -e "apc.enabled = 1\napc.enable_cli = 1" >>/etc/php/7.0/cli/php.ini
 		sed -i 's/#   security = user/   security = user/g' /etc/samba/smb.conf
 		echo -e "[www]\npath = /var/www\nwriteable = yes\nguest ok  = no" >>/etc/samba/smb.conf
+
+		sed -i 's/# multi_accept on;/multi_accept on;\nuse epoll;/g' /etc/nginx/nginx.conf
+		sed -i 's/worker_connections.*/worker_connections 1024;/g' /etc/nginx/nginx.conf
+		sed -i 's/worker_processes.*/worker_processes 4;/g' /etc/nginx/nginx.conf
+
+		sed -i 's/;emergency_restart_threshold = 0/emergency_restart_threshold = 10/g' /etc/php/7.0/fpm/php-fpm.conf
+		sed -i 's/;emergency_restart_interval = 0/emergency_restart_interval = 1m/g' /etc/php/7.0/fpm/php-fpm.conf
+		sed -i 's/;process_control_timeout = 0/process_control_timeout = 10s/g' /etc/php/7.0/fpm/php-fpm.conf
+
+		sudo /etc/init.d/php7.0-fpm restart
+		sudo /etc/init.d/nginx restart
+		
 	echo "     modified system files from php and samba"
 fi
 

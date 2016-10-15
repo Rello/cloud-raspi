@@ -7,10 +7,8 @@ echo "start OC update"
 
 cd ${ocpath}
 sudo -u www-data php occ -V
-read -p "Welche Zielversion? z.B. 8.0.7: " DLVERSION
+read -p "Welche Zielversion? z.B. 9.1.1: " DLVERSION
 sudo -u www-data php occ maintenance:mode --on
-sudo -u www-data php occ app:disable contacts
-sudo -u www-data php occ app:disable calendar
 
 cd ${wwpath}
 sudo rm -rf ${wwpath}/owncloud-backup
@@ -44,7 +42,5 @@ sudo chown -R ${htuser}:${htuser} ${ocdata}/
 
 cd ${ocpath}
 sudo -u www-data php occ upgrade
-#sudo -u www-data php occ app:enable contacts
-#sudo -u www-data php occ app:enable calendar
 sudo -u www-data php occ maintenance:mode --off
 sudo -u www-data php occ -V

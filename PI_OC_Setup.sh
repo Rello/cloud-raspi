@@ -140,3 +140,15 @@ then
 	echo -ne "$PASS\n$PASS" | smbpasswd -as $LOGIN
 fi
 
+# ============================================================
+# Done! Reboot!
+# ============================================================
+if [ "$FULL" = "yes" ]; then
+	x="y"
+else
+	read -p "reboot? (y/n) " x
+fi
+if [ "$x" = "y" ]
+then
+	reboot -h now
+fi

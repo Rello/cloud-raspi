@@ -25,7 +25,7 @@ mkdir /home
 sudo mv /var/lib/samba /mnt/usb/var/lib
 sudo mkdir /var/lib/samba
 sudo rm -rf /var/cache/samba
-sudo ln -s /var/tmp /var/cache/samba
+sudo ln -s /tmp /var/cache/samba
 
 # Modify fstab
 # sudo sh -c "..."
@@ -50,8 +50,9 @@ sudo sed -i '1s/^/exit 0\n/' /etc/cron.daily/man-db
 
 # modify logrotate, php, sql
 sed -i 's#/usr/sbin/logrotate /etc/logrotate.conf#/usr/sbin/logrotate --state /var/log/logrotate.state /etc/logrotate.conf#g' /etc/cron.daily/logrotate
-sed -i 's#;session.save_path = "/var/lib/php/sessions"*#session.save_path = "/var/tmp"#g' /etc/php/7.0/fpm/php.ini
-sed -i 's#^tmpdir.*#tmpdir          = /var/tmp#g' /etc/mysql/my.cnf
+sed -i 's#;session.save_path = "/var/lib/php/sessions"*#session.save_path = "/tmp"#g' /etc/php/7.0/fpm/php.ini
+sed -i 's#^tmpdir.*#tmpdir          = /tmp#g' /etc/mysql/my.cnf
+
 
 sudo /etc/init.d/mysql start
 sudo /etc/init.d/php7.0-fpm restart

@@ -1,0 +1,46 @@
+# get PI3 RO
+
+# format USB (only one)
+mkfs.ext4 /dev/sda1
+mount -t ext4 -o defaults /dev/sda1 /mnt/usb
+mkdir /mnt/usb/var
+
+sudo /etc/init.d/mysql stop
+
+# Move www, owncloud, SQL, home
+mv /var/www /mnt/usb/var
+mkdir /var/www
+
+mv /var/owncloud /mnt/usb/var
+mkdir /var/owncloud
+
+mkdir /mnt/usb/var/lib
+mv /var/lib/mysql /mnt/usb/var/lib
+mkdir /var/lib/mysql
+
+mv /home /mnt/usb/
+mkdir /home
+
+# Modify fstab
+sudo mount -a
+
+# remove swap; disable checks
+update-rc.d -f dphys-swapfile remove
+swapoff /var/swap
+rm /var/swap
+
+tune2fs -c -1 -i 0 /dev/mmcblk0p2
+
+# disable crons
+sudo sed -i '1s/^/exit 0\n/' /etc/cron.hourly/fake-hwclock
+sudo sed -i '1s/^/exit 0\n/' /etc/cron.weekly/man-db
+sudo sed -i '1s/^/exit 0\n/' /etc/cron.daily/man-db
+
+# modify logrotate, php, sql
+sed -i 's#/usr/sbin/logrotate /etc/logrotate.conf#/usr/sbin/logrotate --state /var/log/logrotate.state /etc/logrotate.conf#g' /etc/cron.daily/logrotate
+sed -i 's#;session.save_path = "/var/lib/php/sessions"*#session.save_path = "/var/tmp"#g' /etc/php/7.0/fpm/php.ini
+sed -i 's#^tmpdir.*#tmpdir          = /var/tmp#g' /etc/mysql/my.cnf
+
+sudo /etc/init.d/mysql start
+sudo /etc/init.d/php7.0-fpm restart
+

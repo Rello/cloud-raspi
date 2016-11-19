@@ -22,7 +22,11 @@ mv /home /mnt/usb/
 mkdir /home
 
 # Modify fstab
-sudo mount -a
+grep -q -F '/dev/sda1' /etc/fstab || echo '/dev/sda1\t/mnt/usb\text4\trw,defaults\t0\t0' >> /etc/fstab
+grep -q -F '/mnt/usb/var/www' /etc/fstab || echo '/mnt/usb/var/www\t/var/www\tnone\tbind\t0\t0' >> /etc/fstab
+grep -q -F '/mnt/usb/var/owncloud' /etc/fstab || echo '/mnt/usb/var/owncloud\t/var/owncloud\tnone\tbind\t0\t0' >> /etc/fstab
+grep -q -F '/mnt/usb/var/lib/mysql' /etc/fstab || echo '/mnt/usb/var/lib/mysql\t/var/lib/mysql\tnone\tbind\t0\t0' >> /etc/fstab
+grep -q -F '/mnt/usb/home' /etc/fstab || echo '/mnt/usb/home\t/home\tnone\tbind\t0\t0' >> /etc/fstab
 
 # remove swap; disable checks
 update-rc.d -f dphys-swapfile remove

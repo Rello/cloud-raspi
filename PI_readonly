@@ -1,6 +1,7 @@
 # get PI3 RO
 
 # format USB (only one)
+mkdir /mnt/usb
 mkfs.ext4 /dev/sda1
 mount -t ext4 -o defaults /dev/sda1 /mnt/usb
 mkdir /mnt/usb/var

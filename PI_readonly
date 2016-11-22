@@ -19,7 +19,7 @@ mkdir -p /mnt/usb/var/lib
 mv /var/lib/mysql /mnt/usb/var/lib
 mkdir -p /var/lib/mysql
 
-mv /home /mnt/usb/
+mv /home /mnt/usb
 mkdir -p /home
 
 # Move Samba

@@ -23,10 +23,14 @@ mv /home /mnt/usb
 mkdir -p /home
 
 # Move Samba
-sudo mv /var/lib/samba /mnt/usb/var/lib
-sudo mkdir -p /var/lib/samba
-sudo rm -rf /var/cache/samba
-sudo ln -s /tmp /var/cache/samba
+mv /var/lib/samba /mnt/usb/var/lib
+mkdir -p /var/lib/samba
+rm -rf /var/cache/samba
+ln -s /tmp /var/cache/samba
+
+# Move Nginx
+mv /var/lib/nginx /mnt/usb/var/lib
+mkdir -p /var/lib/nginx
 
 # Modify fstab
 # sudo sh -c "..."
@@ -36,6 +40,7 @@ grep -q -F '/mnt/usb/var/owncloud' /etc/fstab || echo -e '/mnt/usb/var/owncloud\
 grep -q -F '/mnt/usb/var/lib/mysql' /etc/fstab || echo -e '/mnt/usb/var/lib/mysql\t/var/lib/mysql\tnone\tbind\t0\t0' >> /etc/fstab
 grep -q -F '/mnt/usb/home' /etc/fstab || echo -e '/mnt/usb/home\t/home\tnone\tbind\t0\t0' >> /etc/fstab
 grep -q -F '/mnt/usb/var/lib/samba' /etc/fstab || echo -e '/mnt/usb/var/lib/samba\t/var/lib/samba\tnone\tbind\t0\t0' >> /etc/fstab
+grep -q -F '/mnt/usb/var/lib/nginx' /etc/fstab || echo -e '/mnt/usb/var/lib/nginx\t/var/lib/nginx\tnone\tbind\t0\t0' >> /etc/fstab
 
 # remove swap; disable checks
 update-rc.d -f dphys-swapfile remove

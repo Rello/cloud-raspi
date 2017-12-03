@@ -4,23 +4,20 @@
 mkdir -p /mnt/usb
 mkfs.ext4 /dev/sda1
 mount -t ext4 -o defaults /dev/sda1 /mnt/usb
-mkdir -p /mnt/usb/var
 
 mkdir -p /mnt/usb/home
 mkdir -p /mnt/usb/var
 mkdir -p /mnt/usb/var/lib
-mkdir -p /mnt/usb/var/cache
 
 mv /home/admin /mnt/usb/home
-ln -s /mnt/usb/home/admin/ /home
 mv /home/pi /mnt/usb/home
+ln -s /mnt/usb/home/admin/ /home
 ln -s /mnt/usb/home/pi/ /home
 
 # Move www, owncloud, SQL, home
 mv /var/www /mnt/usb/var
-ln -s /mnt/usb/var/www/ /var
-
 mv /var/owncloud /mnt/usb/var
+ln -s /mnt/usb/var/www/ /var
 ln -s /mnt/usb/var/owncloud/ /var
 
 /etc/init.d/mysql stop
@@ -30,8 +27,8 @@ ln -s /mnt/usb/var/lib/mysql/ /var/lib
 
 /etc/init.d/samba stop
 mv /var/lib/samba /mnt/usb/var/lib
+rm -r /var/cache/samba
 ln -s /mnt/usb/var/lib/samba/ /var/lib
-mv /var/cache/samba /mnt/usb/var/cache
 ln -s /tmp /var/cache/samba
 /etc/init.d/samba restart
 

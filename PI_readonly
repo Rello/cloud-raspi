@@ -6,41 +6,37 @@ mkfs.ext4 /dev/sda1
 mount -t ext4 -o defaults /dev/sda1 /mnt/usb
 mkdir -p /mnt/usb/var
 
-sudo /etc/init.d/mysql stop
+mkdir -p /mnt/usb/home
+mkdir -p /mnt/usb/var
+mkdir -p /mnt/usb/var/lib
+mkdir -p /mnt/usb/var/cache
+
+mv /home/admin /mnt/usb/home
+ln -s /mnt/usb/home/admin/ /home
+mv /home/pi /mnt/usb/home
+ln -s /mnt/usb/home/pi/ /home
 
 # Move www, owncloud, SQL, home
 mv /var/www /mnt/usb/var
-mkdir -p /var/www
+ln -s /mnt/usb/var/www/ /var
 
 mv /var/owncloud /mnt/usb/var
-mkdir -p /var/owncloud
+ln -s /mnt/usb/var/owncloud/ /var
 
-mkdir -p /mnt/usb/var/lib
+/etc/init.d/mysql stop
 mv /var/lib/mysql /mnt/usb/var/lib
-mkdir -p /var/lib/mysql
+ln -s /mnt/usb/var/lib/mysql/ /var/lib
+/etc/init.d/mysql start
 
-mv /home /mnt/usb
-mkdir -p /home
-
-# Move Samba
+/etc/init.d/samba stop
 mv /var/lib/samba /mnt/usb/var/lib
-mkdir -p /var/lib/samba
-rm -rf /var/cache/samba
+ln -s /mnt/usb/var/lib/samba/ /var/lib
+mv /var/cache/samba /mnt/usb/var/cache
 ln -s /tmp /var/cache/samba
+/etc/init.d/samba restart
 
-# Move Nginx
 mv /var/lib/nginx /mnt/usb/var/lib
-mkdir -p /var/lib/nginx
-
-# Modify fstab
-# sudo sh -c "..."
-grep -q -F '/dev/sda1' /etc/fstab || echo -e '/dev/sda1\t/mnt/usb\text4\trw,defaults\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/var/www' /etc/fstab || echo -e '/mnt/usb/var/www\t/var/www\tnone\tbind\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/var/owncloud' /etc/fstab || echo -e '/mnt/usb/var/owncloud\t/var/owncloud\tnone\tbind\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/var/lib/mysql' /etc/fstab || echo -e '/mnt/usb/var/lib/mysql\t/var/lib/mysql\tnone\tbind\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/home' /etc/fstab || echo -e '/mnt/usb/home\t/home\tnone\tbind\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/var/lib/samba' /etc/fstab || echo -e '/mnt/usb/var/lib/samba\t/var/lib/samba\tnone\tbind\t0\t0' >> /etc/fstab
-grep -q -F '/mnt/usb/var/lib/nginx' /etc/fstab || echo -e '/mnt/usb/var/lib/nginx\t/var/lib/nginx\tnone\tbind\t0\t0' >> /etc/fstab
+sudo ln -s /mnt/usb/var/lib/nginx/ /var/lib
 
 # remove swap; disable checks
 update-rc.d -f dphys-swapfile remove
@@ -49,10 +45,9 @@ rm /var/swap
 
 tune2fs -c -1 -i 0 /dev/mmcblk0p2
 
-# disable crons
-grep -q -F 'exit 0' /etc/cron.hourly/fake-hwclock || sed -i '1s/^/exit 0\n/' /etc/cron.hourly/fake-hwclock
-grep -q -F 'exit 0' /etc/cron.weekly/man-db || sed -i '1s/^/exit 0\n/' /etc/cron.weekly/man-db
-grep -q -F 'exit 0' /etc/cron.daily/man-db || sed -i '1s/^/exit 0\n/' /etc/cron.daily/man-db
+sudo sh -c "grep -q -F 'exit 0' /etc/cron.hourly/fake-hwclock || sed -i '1s/^/exit 0\n/' /etc/cron.hourly/fake-hwclock"
+sudo sh -c "grep -q -F 'exit 0' /etc/cron.weekly/man-db || sed -i '1s/^/exit 0\n/' /etc/cron.weekly/man-db"
+sudo sh -c "grep -q -F 'exit 0' /etc/cron.daily/man-db || sed -i '1s/^/exit 0\n/' /etc/cron.daily/man-db"
 
 # modify logrotate, php, sql ntp
 sed -i 's#/usr/sbin/logrotate /etc/logrotate.conf#/usr/sbin/logrotate --state /var/log/logrotate.state /etc/logrotate.conf#g' /etc/cron.daily/logrotate
@@ -62,4 +57,3 @@ sed -i 's#driftfile /var/lib/ntp/ntp.drift#driftfile /var/tmp/ntp.drift#g' /etc/
 
 sudo /etc/init.d/mysql start
 sudo /etc/init.d/php7.0-fpm restart
-

@@ -48,9 +48,9 @@ sudo sh -c "grep -q -F 'exit 0' /etc/cron.daily/man-db || sed -i '1s/^/exit 0\n/
 
 # modify logrotate, php, sql ntp
 sed -i 's#/usr/sbin/logrotate /etc/logrotate.conf#/usr/sbin/logrotate --state /var/log/logrotate.state /etc/logrotate.conf#g' /etc/cron.daily/logrotate
-sed -i 's#;session.save_path = "/var/lib/php/sessions"*#session.save_path = "/tmp"#g' /etc/php/7.0/fpm/php.ini
+sed -i 's#;session.save_path = "/var/lib/php/sessions"*#session.save_path = "/tmp"#g' /etc/php/7.3/fpm/php.ini
 sed -i 's#^tmpdir.*#tmpdir          = /tmp#g' /etc/mysql/my.cnf
 sed -i 's#driftfile /var/lib/ntp/ntp.drift#driftfile /var/tmp/ntp.drift#g' /etc/ntp.conf
 
 sudo /etc/init.d/mysql start
-sudo /etc/init.d/php7.0-fpm restart
+sudo /etc/init.d/php7.3-fpm restart

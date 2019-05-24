@@ -4,6 +4,7 @@
 mkdir -p /mnt/usb
 mkfs.ext4 /dev/sda1
 mount -t ext4 -o defaults /dev/sda1 /mnt/usb
+echo -e "/dev/sda1\t/mnt/usb\text4\trw,defaults\t0\t0" >> /etc/fstab
 
 mkdir -p /mnt/usb/home
 mkdir -p /mnt/usb/var
@@ -54,3 +55,7 @@ sed -i 's#driftfile /var/lib/ntp/ntp.drift#driftfile /var/tmp/ntp.drift#g' /etc/
 
 sudo /etc/init.d/mysql start
 sudo /etc/init.d/php7.3-fpm restart
+
+# set /etc/fstab to "ro" manually
+# /dev/mmcblk0p1  /boot           vfat    ro,defaults          0       2
+# /dev/mmcblk0p2  /               ext4    ro,defaults,noatime  0       1

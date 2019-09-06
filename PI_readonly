@@ -1,4 +1,5 @@
-# get PI3 RO
+# get raspberry RO
+# sudo wget -N  https://raw.githubusercontent.com/Rello/cloud-raspi/master/PI_readonly  && sudo bash PI_readonly
 
 # format USB (only one)
 mkdir -p /mnt/usb

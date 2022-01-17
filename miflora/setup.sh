@@ -9,6 +9,7 @@ pip3 install bluepy
 pip3 install miflora
 
 wget -N  https://raw.githubusercontent.com/Rello/cloud-raspi/master/miflora/all_sensors.py
+# python3 /home/pi/miflora/all_sensors.py
 
 #
 # make PI RO
@@ -35,3 +36,6 @@ sudo sh -c "echo 'tmpfs\t/tmp\t tmpfs\tdefaults,noatime,nosuid\t0\t0' >> /etc/fs
 # sudo mount -o remount,rw /boot
 # sudo mount -o remount,ro /
 # sudo mount -o remount,ro /boot
+
+#* 11,17 * * * python3 /home/pi/miflora/all_sensors.py
+#/etc/init.d/cron restart

@@ -37,5 +37,5 @@ sudo sh -c "echo 'tmpfs\t/tmp\t tmpfs\tdefaults,noatime,nosuid\t0\t0' >> /etc/fs
 # sudo mount -o remount,ro /
 # sudo mount -o remount,ro /boot
 
-#* 11,17 * * * python3 /home/pi/miflora/all_sensors.py
+#1 11,17 * * * python3 /home/pi/miflora/all_sensors.py
 #/etc/init.d/cron restart
